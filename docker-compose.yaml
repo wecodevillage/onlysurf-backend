@@ -1,0 +1,46 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - 4000:4000
+    volumes:
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - ./package.json:/app/package.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - /app/node_modules
+    depends_on:
+      - db
+    env_file:
+      - .env
+    command: ash /app/scripts/start-reload.sh
+    networks:
+      - onlysurf
+
+  db:
+    image: postgres:18
+    ports:
+      - 5432:5432
+    mem_limit: 512m
+    cpu_shares: 512
+    environment:
+      POSTGRES_USER: onlysurf
+      POSTGRES_PASSWORD: onlysurf1234
+      POSTGRES_DB: onlysurf
+      POSTGRES_PORT: 5432
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - onlysurf_db_data:/var/lib/postgresql/data
+    networks:
+      - onlysurf
+
+volumes:
+  onlysurf_db_data:
+
+networks:
+  onlysurf:
+    driver: bridge
+    external: false

@@ -1,0 +1,407 @@
+// OnlySurf Backend - Prisma Schema
+// Multi-tenant surf coaching platform with video management
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ================================
+// User Management
+// ================================
+
+enum UserRole {
+  ATHLETE
+  COACH
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE_ATHLETE
+  PRO_SURFER
+  COACH_STARTER
+  COACH_PRO
+  ACADEMY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  TRIALING
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  UNPAID
+}
+
+model User {
+  id        String   @id @default(cuid())
+  firebaseUid String @unique
+  email     String   @unique
+  role      UserRole @default(ATHLETE)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  profile           Profile?
+  academyMemberships AcademyMembership[]
+  ownedAcademies    Academy[]           @relation("AcademyOwner")
+  coachingSessions  Session[]           @relation("SessionCoach")
+  rosteredSessions  SessionRoster[]
+  waveTags          WaveTag[]
+  scores            Score[]
+  notes             Note[]
+  subscription      Subscription?
+  savedWaves        SavedWave[]
+  payments          Payment[]
+
+  @@index([firebaseUid])
+  @@index([email])
+  @@map("users")
+}
+
+model Profile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  firstName   String?
+  lastName    String?
+  displayName String?
+  bio         String?  @db.Text
+  avatarUrl   String?
+  location    String?
+  phone       String?
+  dateOfBirth DateTime?
+  isPremium   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// ================================
+// Academy & Membership
+// ================================
+
+model Academy {
+  id          String   @id @default(cuid())
+  name        String
+  description String?  @db.Text
+  logoUrl     String?
+  location    String?
+  website     String?
+  ownerId     String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  owner       User                 @relation("AcademyOwner", fields: [ownerId], references: [id])
+  memberships AcademyMembership[]
+  sessions    Session[]
+  waves       Wave[]
+  savedWaves  SavedWave[]
+  payments    Payment[]
+
+  @@index([ownerId])
+  @@index([isActive])
+  @@map("academies")
+}
+
+enum MemberRole {
+  ATHLETE
+  COACH
+  OWNER
+}
+
+model AcademyMembership {
+  id        String     @id @default(cuid())
+  academyId String
+  userId    String
+  role      MemberRole @default(ATHLETE)
+  joinedAt  DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  academy Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([academyId, userId])
+  @@index([academyId])
+  @@index([userId])
+  @@map("academy_memberships")
+}
+
+// ================================
+// Sessions & Roster
+// ================================
+
+enum SessionType {
+  TRAINING
+  FREE_SURF
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  ARCHIVED
+}
+
+model Session {
+  id          String        @id @default(cuid())
+  academyId   String?
+  coachId     String
+  title       String
+  description String?       @db.Text
+  type        SessionType   @default(TRAINING)
+  status      SessionStatus @default(SCHEDULED)
+  location    String?
+  scheduledAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  archivedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  academy Academy?        @relation(fields: [academyId], references: [id])
+  coach   User            @relation("SessionCoach", fields: [coachId], references: [id])
+  roster  SessionRoster[]
+  waves   Wave[]
+
+  @@index([academyId])
+  @@index([coachId])
+  @@index([status])
+  @@index([scheduledAt])
+  @@map("sessions")
+}
+
+model SessionRoster {
+  id        String   @id @default(cuid())
+  sessionId String
+  athleteId String
+  addedAt   DateTime @default(now())
+
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  athlete User    @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, athleteId])
+  @@index([sessionId])
+  @@index([athleteId])
+  @@map("session_rosters")
+}
+
+// ================================
+// Video & Waves
+// ================================
+
+enum VideoStatus {
+  PREPARING
+  READY
+  ERRORED
+}
+
+model VideoAsset {
+  id           String      @id @default(cuid())
+  muxAssetId   String      @unique
+  muxPlaybackId String?
+  status       VideoStatus @default(PREPARING)
+  durationSeconds Float?
+  aspectRatio  String?
+  maxWidth     Int?
+  maxHeight    Int?
+  uploadedAt   DateTime    @default(now())
+  createdAt    DateTime    @default(now())
+
+  waves Wave[]
+
+  @@index([muxAssetId])
+  @@index([status])
+  @@map("video_assets")
+}
+
+model Wave {
+  id          String   @id @default(cuid())
+  sessionId   String
+  academyId   String?
+  videoAssetId String
+  title       String?
+  description String?  @db.Text
+  startTime   Float?   // seconds into video
+  endTime     Float?   // seconds into video
+  durationSeconds Float?
+  thumbnailUrl String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  session    Session      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  academy    Academy?     @relation(fields: [academyId], references: [id])
+  videoAsset VideoAsset   @relation(fields: [videoAssetId], references: [id])
+  tags       WaveTag[]
+  scores     Score[]
+  notes      Note[]
+  savedWaves SavedWave[]
+
+  @@index([sessionId])
+  @@index([academyId])
+  @@index([videoAssetId])
+  @@map("waves")
+}
+
+model WaveTag {
+  id        String   @id @default(cuid())
+  waveId    String
+  athleteId String
+  taggedAt  DateTime @default(now())
+
+  wave    Wave @relation(fields: [waveId], references: [id], onDelete: Cascade)
+  athlete User @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@unique([waveId, athleteId])
+  @@index([waveId])
+  @@index([athleteId])
+  @@map("wave_tags")
+}
+
+model SavedWave {
+  id               String   @id @default(cuid())
+  waveId           String
+  athleteId        String
+  sessionId        String   // preserve session reference
+  academyId        String?  // preserve academy reference
+  coachId          String   // preserve coach reference
+  durationSnapshot Float    // snapshot for quota calculations
+  savedAt          DateTime @default(now())
+
+  wave    Wave     @relation(fields: [waveId], references: [id], onDelete: Cascade)
+  athlete User     @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+  academy Academy? @relation(fields: [academyId], references: [id])
+
+  @@unique([waveId, athleteId])
+  @@index([waveId])
+  @@index([athleteId])
+  @@index([academyId])
+  @@map("saved_waves")
+}
+
+// ================================
+// Scoring & Feedback
+// ================================
+
+model Score {
+  id        String   @id @default(cuid())
+  waveId    String
+  coachId   String
+  score     Float    // 0-10
+  category  String?  // e.g., "takeoff", "turn", "barrel"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wave  Wave @relation(fields: [waveId], references: [id], onDelete: Cascade)
+  coach User @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@index([waveId])
+  @@index([coachId])
+  @@map("scores")
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  waveId    String
+  coachId   String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  wave  Wave @relation(fields: [waveId], references: [id], onDelete: Cascade)
+  coach User @relation(fields: [coachId], references: [id], onDelete: Cascade)
+
+  @@index([waveId])
+  @@index([coachId])
+  @@map("notes")
+}
+
+// ================================
+// Payments
+// ================================
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELED
+}
+
+model Payment {
+  id          String        @id @default(cuid())
+  academyId   String
+  athleteId   String
+  amount      Float
+  currency    String        @default("EUR")
+  description String?
+  status      PaymentStatus @default(PENDING)
+  dueDate     DateTime
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  academy Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  athlete User    @relation(fields: [athleteId], references: [id], onDelete: Cascade)
+
+  @@index([academyId])
+  @@index([athleteId])
+  @@index([status])
+  @@map("payments")
+}
+
+// ================================
+// Billing & Subscriptions
+// ================================
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String             @unique
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  tier                 SubscriptionTier   @default(FREE_ATHLETE)
+  status               SubscriptionStatus @default(ACTIVE)
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  cancelAtPeriodEnd    Boolean            @default(false)
+  trialEnd             DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+// ================================
+// Webhooks
+// ================================
+
+enum WebhookSource {
+  MUX
+  STRIPE
+}
+
+model WebhookEvent {
+  id         String        @id @default(cuid())
+  source     WebhookSource
+  eventId    String        @unique
+  eventType  String
+  payload    Json
+  processed  Boolean       @default(false)
+  receivedAt DateTime      @default(now())
+  processedAt DateTime?
+
+  @@index([source])
+  @@index([processed])
+  @@index([eventId])
+  @@map("webhook_events")
+}
