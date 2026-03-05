@@ -78,6 +78,17 @@ enum PrivacyLevel {
   PRIVATE
 }
 
+enum Stance {
+  GOOFY
+  REGULAR
+}
+
+enum SurferLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
 model Profile {
   id          String   @id @default(cuid())
   userId      String   @unique
@@ -89,6 +100,12 @@ model Profile {
   location    String?
   phone       String?
   dateOfBirth DateTime?
+  weight      Float?   // in kg
+  height      Float?   // in cm
+  stance      Stance?
+  level       SurferLevel?
+  country     String?
+  locale      String?  @default("en-US")
   isPremium   Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -226,6 +243,11 @@ model Session {
   type        SessionType   @default(TRAINING)
   status      SessionStatus @default(SCHEDULED)
   location    String?
+  photoUrl    String?
+  conditions  String?       @db.Text
+  notes       String?       @db.Text
+  latitude    Float?
+  longitude   Float?
   scheduledAt DateTime?
   startedAt   DateTime?
   completedAt DateTime?

@@ -28,6 +28,11 @@ class CreateSessionDto {
   description?: string;
   type: SessionType;
   location?: string;
+  photoUrl?: string;
+  conditions?: string;
+  notes?: string;
+  latitude?: number;
+  longitude?: number;
   scheduledAt?: Date;
 }
 
@@ -36,6 +41,11 @@ class UpdateSessionDto {
   description?: string;
   status?: SessionStatus;
   location?: string;
+  photoUrl?: string;
+  conditions?: string;
+  notes?: string;
+  latitude?: number;
+  longitude?: number;
   scheduledAt?: Date;
 }
 

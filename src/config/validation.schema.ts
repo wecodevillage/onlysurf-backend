@@ -47,6 +47,13 @@ export const validationSchema: Joi.ObjectSchema = Joi.object({
   RATE_LIMIT_TTL: Joi.number().default(60),
   RATE_LIMIT_MAX: Joi.number().default(100),
 
+  // Sentry
+  SENTRY_DSN: Joi.string().uri().optional(),
+  SENTRY_ENABLED: Joi.boolean().default(false),
+  SENTRY_TRACES_SAMPLE_RATE: Joi.number().min(0).max(1).default(0.1),
+  SENTRY_PROFILES_SAMPLE_RATE: Joi.number().min(0).max(1).default(0.1),
+  SENTRY_DEBUG: Joi.boolean().default(false),
+
   // Session Archive
   SESSION_ARCHIVE_DAYS: Joi.number().default(30),
 });

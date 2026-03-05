@@ -11,12 +11,14 @@ import muxConfig from './config/mux.config';
 import redisConfig from './config/redis.config';
 import stripeConfig from './config/stripe.config';
 import resendConfig from './config/resend.config';
+import sentryConfig from './config/sentry.config';
 import { validationSchema } from './config/validation.schema';
 
 // Modules
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
+import { SentryModule } from './common/sentry/sentry.module';
 
 // Feature Modules
 import { AcademiesModule } from './academies/academies.module';
@@ -43,6 +45,7 @@ import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
         redisConfig,
         stripeConfig,
         resendConfig,
+        sentryConfig,
       ],
       validationSchema,
       validationOptions: {
@@ -63,6 +66,7 @@ import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
     PrismaModule,
     AuthModule,
     HealthModule,
+    SentryModule,
 
     // V1 Feature Modules
     AcademiesModule,

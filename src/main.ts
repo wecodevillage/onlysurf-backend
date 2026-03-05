@@ -3,6 +3,8 @@ import { ValidationPipe, Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { SentryInterceptor } from './common/sentry/sentry.interceptor';
+import { SentryService } from './common/sentry/sentry.service';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -42,6 +44,10 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Sentry error tracking
+  const sentryService = app.get(SentryService);
+  app.useGlobalInterceptors(new SentryInterceptor(sentryService));
 
   // OpenAPI / Swagger Documentation
   const config = new DocumentBuilder()

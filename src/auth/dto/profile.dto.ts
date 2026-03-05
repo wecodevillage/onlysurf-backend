@@ -1,5 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SocialNetworkType, PrivacyLevel } from '@prisma/client';
+import {
+  SocialNetworkType,
+  PrivacyLevel,
+  Stance,
+  SurferLevel,
+} from '@prisma/client';
 
 export class UpdateProfileDto {
   @ApiPropertyOptional({ description: 'First name' })
@@ -25,6 +30,32 @@ export class UpdateProfileDto {
 
   @ApiPropertyOptional({ description: 'Date of birth' })
   dateOfBirth?: Date;
+
+  @ApiPropertyOptional({ description: 'Weight in kg', example: 70 })
+  weight?: number;
+
+  @ApiPropertyOptional({ description: 'Height in cm', example: 175 })
+  height?: number;
+
+  @ApiPropertyOptional({
+    enum: Stance,
+    description: 'Surfing stance',
+    example: 'REGULAR',
+  })
+  stance?: Stance;
+
+  @ApiPropertyOptional({
+    enum: SurferLevel,
+    description: 'Surfer skill level',
+    example: 'INTERMEDIATE',
+  })
+  level?: SurferLevel;
+
+  @ApiPropertyOptional({ description: 'Country code', example: 'PT' })
+  country?: string;
+
+  @ApiPropertyOptional({ description: 'Locale', example: 'en-US' })
+  locale?: string;
 }
 
 export class CreateSocialNetworkDto {
