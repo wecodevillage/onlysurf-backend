@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class WavesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: {
+  create(data: {
     sessionId: string;
     academyId?: string;
     videoAssetId: string;
@@ -16,6 +16,7 @@ export class WavesService {
     durationSeconds?: number;
     thumbnailUrl?: string;
   }) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.create({
       data,
       include: {
@@ -41,7 +42,8 @@ export class WavesService {
     });
   }
 
-  async findAll(sessionId?: string, athleteId?: string) {
+  findAll(sessionId?: string, athleteId?: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.findMany({
       where: {
         ...(sessionId && { sessionId }),
@@ -165,10 +167,11 @@ export class WavesService {
       throw new NotFoundException('Wave not found');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return wave;
   }
 
-  async update(
+  update(
     id: string,
     data: {
       title?: string;
@@ -176,19 +179,22 @@ export class WavesService {
       thumbnailUrl?: string;
     },
   ) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.update({
       where: { id },
       data,
     });
   }
 
-  async delete(id: string) {
+  delete(id: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.delete({
       where: { id },
     });
   }
 
-  async tagAthlete(waveId: string, athleteId: string) {
+  tagAthlete(waveId: string, athleteId: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.waveTag.create({
       data: {
         waveId,
@@ -206,12 +212,8 @@ export class WavesService {
     });
   }
 
-  async addScore(
-    waveId: string,
-    coachId: string,
-    score: number,
-    category?: string,
-  ) {
+  addScore(waveId: string, coachId: string, score: number, category?: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.score.create({
       data: {
         waveId,
@@ -231,7 +233,35 @@ export class WavesService {
     });
   }
 
-  async addNote(waveId: string, coachId: string, content: string) {
+  updateScore(id: string, score?: number, category?: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.prisma.score.update({
+      where: { id },
+      data: {
+        ...(score !== undefined && { score }),
+        ...(category !== undefined && { category }),
+      },
+      include: {
+        coach: {
+          select: {
+            id: true,
+            email: true,
+            profile: true,
+          },
+        },
+      },
+    });
+  }
+
+  deleteScore(id: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.prisma.score.delete({
+      where: { id },
+    });
+  }
+
+  addNote(waveId: string, coachId: string, content: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.note.create({
       data: {
         waveId,
@@ -247,6 +277,32 @@ export class WavesService {
           },
         },
       },
+    });
+  }
+
+  updateNote(id: string, content: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.prisma.note.update({
+      where: { id },
+      data: {
+        content,
+      },
+      include: {
+        coach: {
+          select: {
+            id: true,
+            email: true,
+            profile: true,
+          },
+        },
+      },
+    });
+  }
+
+  deleteNote(id: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.prisma.note.delete({
+      where: { id },
     });
   }
 

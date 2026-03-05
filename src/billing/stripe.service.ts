@@ -4,6 +4,26 @@ import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
 
+export interface SubscriptionPlan {
+  tier: string;
+  name: string;
+  price: number;
+  currency: string;
+  interval: string;
+  priceId: string | null;
+  athletes: number;
+  sessions: number;
+  videoMinutes: number;
+  coaches: number;
+  archiveMonths: number;
+  features: string[];
+}
+
+export interface SubscriptionPlans {
+  coach: SubscriptionPlan[];
+  athlete: SubscriptionPlan[];
+}
+
 @Injectable()
 export class StripeService implements OnModuleInit {
   private readonly logger = new Logger(StripeService.name);
@@ -289,7 +309,7 @@ export class StripeService implements OnModuleInit {
     return statusMap[status] || 'ACTIVE';
   }
 
-  getPlans() {
+  getPlans(): SubscriptionPlans {
     const prices = this.configService.get<any>('stripe.prices');
 
     return {
@@ -301,6 +321,11 @@ export class StripeService implements OnModuleInit {
           currency: 'EUR',
           interval: 'month',
           priceId: prices.coachStarterMonthly,
+          athletes: 10,
+          sessions: 20,
+          videoMinutes: 120,
+          coaches: 1,
+          archiveMonths: 1,
           features: [
             '10 athletes',
             '20 sessions/month',
@@ -320,6 +345,11 @@ export class StripeService implements OnModuleInit {
           currency: 'EUR',
           interval: 'month',
           priceId: prices.coachProMonthly,
+          athletes: 40,
+          sessions: 80,
+          videoMinutes: 600,
+          coaches: 3,
+          archiveMonths: 1,
           features: [
             '40 athletes',
             '80 sessions/month',
@@ -340,6 +370,11 @@ export class StripeService implements OnModuleInit {
           currency: 'EUR',
           interval: 'month',
           priceId: prices.academyMonthly,
+          athletes: 150,
+          sessions: 300,
+          videoMinutes: 2000,
+          coaches: 0,
+          archiveMonths: 1,
           features: [
             '150 athletes',
             '300 sessions/month',
@@ -360,6 +395,11 @@ export class StripeService implements OnModuleInit {
           currency: 'EUR',
           interval: 'month',
           priceId: null,
+          athletes: 0,
+          sessions: 0,
+          videoMinutes: 0,
+          coaches: 0,
+          archiveMonths: 0,
           features: ['View tagged waves', 'Download waves'],
         },
         {
@@ -369,6 +409,11 @@ export class StripeService implements OnModuleInit {
           currency: 'EUR',
           interval: 'month',
           priceId: prices.proSurferMonthly,
+          athletes: 0,
+          sessions: 0,
+          videoMinutes: 0,
+          coaches: 0,
+          archiveMonths: 0,
           features: [
             'Create free surf sessions',
             'Save waves',

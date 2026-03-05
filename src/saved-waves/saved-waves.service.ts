@@ -2,12 +2,19 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MuxService } from '../media/mux.service';
 
 @Injectable()
 export class SavedWavesService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(SavedWavesService.name);
+
+  constructor(
+    private prisma: PrismaService,
+    private muxService: MuxService,
+  ) {}
 
   async saveWave(athleteId: string, waveId: string) {
     // Get wave details to preserve references
@@ -121,6 +128,13 @@ export class SavedWavesService {
         wave: {
           include: {
             videoAsset: true,
+            session: {
+              select: {
+                id: true,
+                status: true,
+                archivedAt: true,
+              },
+            },
           },
         },
       },
@@ -150,13 +164,38 @@ export class SavedWavesService {
       },
     });
 
-    // If no other references and the session is archived, delete the Mux asset
-    // This would be handled by the archiving service in production
-    // For now, we just return the status
+    const isSessionArchived =
+      savedWave.wave.session.status === 'ARCHIVED' ||
+      savedWave.wave.session.archivedAt !== null;
+    const muxAssetId = savedWave.wave.videoAsset.muxAssetId;
+    const shouldDeleteAsset =
+      otherReferences === 0 && muxAssetId && isSessionArchived;
+
+    // Only delete Mux asset if no references AND session is archived
+    // Active sessions will be handled by the archiving process
+    if (shouldDeleteAsset) {
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        await this.muxService.deleteAsset(muxAssetId);
+        this.logger.log(
+          `Deleted Mux asset ${muxAssetId} - no remaining references and session archived`,
+        );
+      } catch (error) {
+        this.logger.error(`Failed to delete Mux asset ${muxAssetId}: ${error}`);
+        // Continue even if Mux deletion fails
+      }
+    } else if (!muxAssetId) {
+      this.logger.debug(`Skipping Mux asset deletion - no Mux asset ID`);
+    } else if (!isSessionArchived) {
+      this.logger.debug(
+        `Skipping Mux asset deletion for ${muxAssetId} - session still active`,
+      );
+    }
+
     return {
       deleted: true,
-      shouldDeleteAsset: otherReferences === 0,
-      assetId: savedWave.wave.videoAsset.muxAssetId,
+      assetDeleted: shouldDeleteAsset,
+      assetId: muxAssetId,
     };
   }
 

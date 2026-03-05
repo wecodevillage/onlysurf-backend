@@ -48,7 +48,16 @@ class AddScoreDto {
   category?: string;
 }
 
+class UpdateScoreDto {
+  score?: number;
+  category?: string;
+}
+
 class AddNoteDto {
+  content: string;
+}
+
+class UpdateNoteDto {
   content: string;
 }
 
@@ -175,6 +184,39 @@ export class WavesController {
     return { score };
   }
 
+  @Patch('scores/:scoreId')
+  @ApiOperation({
+    summary: 'Update score',
+    description: 'Update an existing score',
+  })
+  @ApiParam({ name: 'scoreId', description: 'Score ID' })
+  @ApiBody({ type: UpdateScoreDto })
+  @ApiResponse({ status: 200, description: 'Score updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Score not found' })
+  async updateScore(
+    @Param('scoreId') scoreId: string,
+    @Body() dto: UpdateScoreDto,
+  ) {
+    const score = await this.wavesService.updateScore(
+      scoreId,
+      dto.score,
+      dto.category,
+    );
+    return { score };
+  }
+
+  @Delete('scores/:scoreId')
+  @ApiOperation({ summary: 'Delete score', description: 'Remove a score' })
+  @ApiParam({ name: 'scoreId', description: 'Score ID' })
+  @ApiResponse({ status: 200, description: 'Score deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Score not found' })
+  async deleteScore(@Param('scoreId') scoreId: string) {
+    await this.wavesService.deleteScore(scoreId);
+    return { message: 'Score deleted successfully' };
+  }
+
   @Post(':id/notes')
   @ApiOperation({
     summary: 'Add note to wave',
@@ -192,6 +234,35 @@ export class WavesController {
   ) {
     const note = await this.wavesService.addNote(id, user.id, dto.content);
     return { note };
+  }
+
+  @Patch('notes/:noteId')
+  @ApiOperation({
+    summary: 'Update note',
+    description: 'Update an existing note',
+  })
+  @ApiParam({ name: 'noteId', description: 'Note ID' })
+  @ApiBody({ type: UpdateNoteDto })
+  @ApiResponse({ status: 200, description: 'Note updated successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Note not found' })
+  async updateNote(
+    @Param('noteId') noteId: string,
+    @Body() dto: UpdateNoteDto,
+  ) {
+    const note = await this.wavesService.updateNote(noteId, dto.content);
+    return { note };
+  }
+
+  @Delete('notes/:noteId')
+  @ApiOperation({ summary: 'Delete note', description: 'Remove a note' })
+  @ApiParam({ name: 'noteId', description: 'Note ID' })
+  @ApiResponse({ status: 200, description: 'Note deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Note not found' })
+  async deleteNote(@Param('noteId') noteId: string) {
+    await this.wavesService.deleteNote(noteId);
+    return { message: 'Note deleted successfully' };
   }
 
   @Get(':id/download')
