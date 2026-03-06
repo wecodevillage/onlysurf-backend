@@ -2,14 +2,22 @@
     "version": 2,
     "builds": [
         {
-            "src": "src/vercel.ts",
+            "src": "src/serverless.ts",
             "use": "@vercel/node"
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
+            "src": "/images/(.*)",
+            "dest": "/public/images/$1"
+        },
+        {
             "src": "/(.*)",
-            "dest": "src/vercel.ts"
+            "dest": "src/serverless.ts"
         }
     ],
     "env": {
