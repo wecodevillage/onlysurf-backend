@@ -11,6 +11,7 @@ export const validationSchema: Joi.ObjectSchema = Joi.object({
 
   // Database
   DATABASE_URL: Joi.string().required(),
+  DIRECT_URL: Joi.string().optional(),
 
   // Firebase
   FIREBASE_PROJECT_ID: Joi.string().required(),

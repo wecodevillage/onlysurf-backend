@@ -9,6 +9,7 @@ export default defineConfig({
     path: 'prisma/migrations',
   },
   datasource: {
+    // Pooled connection for application and serverless (Neon)
     url: process.env['DATABASE_URL'],
   },
 });
