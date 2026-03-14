@@ -113,4 +113,39 @@ export class BillingController {
     await this.stripeService.handleWebhook(rawBody, signature);
     return { received: true };
   }
+
+  @Get('prices/import')
+  @ApiBearerAuth('firebase-auth')
+  @ApiOperation({
+    summary: 'Import prices from CSV',
+    description:
+      'Reads prices.csv from the project root and creates the corresponding products and prices in the configured Stripe account. Idempotent: already-existing products and prices are skipped.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Import completed',
+    schema: {
+      type: 'object',
+      properties: {
+        products: {
+          type: 'object',
+          properties: {
+            created: { type: 'number' },
+            skipped: { type: 'number' },
+          },
+        },
+        prices: {
+          type: 'object',
+          properties: {
+            created: { type: 'number' },
+            skipped: { type: 'number' },
+            errors: { type: 'array', items: { type: 'string' } },
+          },
+        },
+      },
+    },
+  })
+  async importPrices() {
+    return this.stripeService.importPricesFromCsv();
+  }
 }

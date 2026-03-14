@@ -18,25 +18,53 @@ cd onlysurf-backend
 npm install
 ```
 
-## Step 2: Database Setup
+## Step 2: Database Setup (Neon Serverless PostgreSQL)
 
-### Option A: Use Neon (Recommended)
+This project uses **Neon** with database branching for development. No local PostgreSQL container needed!
 
-1. Go to [neon.tech](https://neon.tech)
-2. Create a new project
-3. Copy the connection string (looks like: `postgresql://user:pass@host/db?sslmode=require`)
+### 1. Create Neon Account & Project
 
-### Option B: Local PostgreSQL
+1. Go to [neon.tech](https://neon.tech) and sign up
+2. Create a new project called "OnlySurf"
+3. Copy your connection string from the dashboard
+
+### 2. Create Your Development Branch
+
+**Option A: Using the helper script**
 
 ```bash
-# macOS (Homebrew)
-brew install postgresql
-brew services start postgresql
-createdb onlysurf_dev
+# Set your Neon credentials in .env first
+export NEON_PROJECT_ID=your-project-id
+export NEON_API_KEY=your-api-key
 
-# Use this connection string:
-# postgresql://localhost:5432/onlysurf_dev
+# Create a personal dev branch
+./scripts/neon-branch.sh create dev-yourname main
+
+# Get the connection string
+./scripts/neon-branch.sh connect dev-yourname
 ```
+
+**Option B: Using Neon Console**
+
+1. Go to your Neon project dashboard
+2. Click "Branches" → "Create Branch"
+3. Name it `dev-yourname` (or any name)
+4. Select `main` as parent
+5. Copy the connection string
+
+**Option C: Use the main branch directly**
+
+Just use the default `main` branch connection string for quick testing.
+
+### 3. Why Neon Branches?
+
+- ✅ **Instant creation** - Branches are created in milliseconds
+- ✅ **Isolated development** - Each developer has their own database
+- ✅ **Cost efficient** - Branches only store changes
+- ✅ **Cloud-based** - No Docker or local PostgreSQL needed
+- ✅ **Serverless optimized** - Perfect for Vercel deployment
+
+📖 See [NEON-BRANCHES.md](NEON-BRANCHES.md) for detailed branch management guide.
 
 ## Step 3: Configure Environment
 

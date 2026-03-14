@@ -1,5 +1,8 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as Papa from 'papaparse';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
@@ -423,5 +426,142 @@ export class StripeService implements OnModuleInit {
         },
       ],
     };
+  }
+
+  async importPricesFromCsv(csvFilePath?: string): Promise<{
+    products: { created: number; skipped: number };
+    prices: { created: number; skipped: number; errors: string[] };
+  }> {
+    console.log('Importing prices now');
+    const filePath = csvFilePath ?? path.resolve(process.cwd(), 'prices.csv');
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`CSV file not found at path: ${filePath}`);
+    }
+
+    const csvContent = fs.readFileSync(filePath, 'utf-8');
+
+    interface PriceCsvRow {
+      'Price ID': string;
+      'Product ID': string;
+      'Product Name': string;
+      'Product Statement Descriptor': string;
+      'Product Tax Code': string;
+      Description: string;
+      'Created (UTC)': string;
+      Amount: string;
+      Currency: string;
+      Interval: string;
+      'Interval Count': string;
+      'Usage Type': string;
+      'Aggregate Usage': string;
+      'Billing Scheme': string;
+      'Trial Period Days': string;
+      'Tax Behavior': string;
+    }
+
+    const { data } = Papa.parse<PriceCsvRow>(csvContent, {
+      header: true,
+      skipEmptyLines: true,
+    });
+
+    const result = {
+      products: { created: 0, skipped: 0 },
+      prices: { created: 0, skipped: 0, errors: [] as string[] },
+    };
+
+    // Collect unique products from CSV
+    const productMap = new Map<
+      string,
+      { name: string; statementDescriptor: string; taxCode: string }
+    >();
+    for (const row of data) {
+      if (row['Product ID'] && !productMap.has(row['Product ID'])) {
+        productMap.set(row['Product ID'], {
+          name: row['Product Name'],
+          statementDescriptor: row['Product Statement Descriptor'],
+          taxCode: row['Product Tax Code'],
+        });
+      }
+    }
+
+    // Ensure each product exists in Stripe (create if missing)
+    const existingProductIds = new Set<string>();
+    for (const [productId, productData] of productMap.entries()) {
+      try {
+        await this.stripe.products.retrieve(productId);
+        existingProductIds.add(productId);
+        result.products.skipped++;
+        this.logger.log(
+          `Product already exists: ${productId} (${productData.name})`,
+        );
+      } catch {
+        // Product not found — create it with the same ID so price references stay valid
+        const createParams: Stripe.ProductCreateParams & { id: string } = {
+          id: productId,
+          name: productData.name,
+        };
+        if (productData.statementDescriptor) {
+          createParams.statement_descriptor = productData.statementDescriptor;
+        }
+        if (productData.taxCode) {
+          createParams.tax_code = productData.taxCode;
+        }
+        const created = await this.stripe.products.create(
+          createParams as Stripe.ProductCreateParams,
+        );
+        existingProductIds.add(created.id);
+        result.products.created++;
+        this.logger.log(`Created product: ${productId} (${productData.name})`);
+      }
+    }
+
+    // Create each price in Stripe
+    for (const row of data) {
+      const priceId = row['Price ID'];
+      try {
+        await this.stripe.prices.retrieve(priceId);
+        result.prices.skipped++;
+        this.logger.log(
+          `Price already exists: ${priceId} (${row.Description})`,
+        );
+        continue;
+      } catch {
+        // Price not found — proceed to create
+      }
+
+      try {
+        // Amount in CSV uses European decimal format ("199,90") — convert to cents
+        const amountDecimal = parseFloat(row.Amount.replace(',', '.'));
+        const amountInCents = Math.round(amountDecimal * 100);
+
+        const priceParams: Stripe.PriceCreateParams = {
+          currency: row.Currency.toLowerCase(),
+          product: row['Product ID'],
+          unit_amount: amountInCents,
+          nickname: row.Description || undefined,
+          recurring: {
+            interval:
+              row.Interval as Stripe.PriceCreateParams.Recurring.Interval,
+            interval_count: parseInt(row['Interval Count'], 10) || 1,
+          },
+          tax_behavior:
+            (row['Tax Behavior'] as Stripe.PriceCreateParams.TaxBehavior) ||
+            undefined,
+        };
+
+        await this.stripe.prices.create(priceParams);
+        result.prices.created++;
+        this.logger.log(
+          `Created price: ${row.Description} (${row.Amount} ${row.Currency}/${row.Interval})`,
+        );
+      } catch (err: any) {
+        const msg = `Failed to create price "${priceId}" (${row.Description}): ${err.message}`;
+        result.prices.errors.push(msg);
+        this.logger.error(msg);
+      }
+    }
+
+    return result;
   }
 }

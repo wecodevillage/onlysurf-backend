@@ -1,0 +1,9 @@
+Price ID,Product ID,Product Name,Product Statement Descriptor,Product Tax Code,Description,Created (UTC),Amount,Currency,Interval,Interval Count,Usage Type,Aggregate Usage,Billing Scheme,Trial Period Days,Tax Behavior
+price_1TAUbiCOpqoBRvEkZLEIsuhx,prod_U8lmMKrUwwM6N9,Coach Starter,OnlySurf Coach Starter,txcd_10000000,Coach Starter Yearly,2026-03-13 12:14,"199,90",eur,year,1,licensed,,per_unit,,unspecified
+price_1TAUb4COpqoBRvEkEb8tHkV5,prod_U8loSmYCbFKMiw,Coach Pro,OnlySurf Coach Pro,txcd_10000000,Coach Pro Yearly,2026-03-13 12:13,"399,90",eur,year,1,licensed,,per_unit,,unspecified
+price_1TAUaGCOpqoBRvEkshW18Usc,prod_U8lpILMM3fNqsg,Surf School,OnlySurf Surf School,txcd_10000000,Surf School Yearly,2026-03-13 12:12,"999,90",eur,year,1,licensed,,per_unit,,unspecified
+price_1TAUZXCOpqoBRvEkGlk9a3gK,prod_U8lsDD4OL88SEd,Surfer Pro,OnlySurf Surfer Pro,txcd_10000000,Surfer Pro Yearly,2026-03-13 12:12,"49,90",eur,year,1,licensed,,per_unit,,unspecified
+price_1TAUKGCOpqoBRvEk5d1FjE57,prod_U8lsDD4OL88SEd,Surfer Pro,OnlySurf Surfer Pro,txcd_10000000,Surfer Pro Monthly,2026-03-13 11:56,"4,99",eur,month,1,licensed,,per_unit,,unspecified
+price_1TAUIBCOpqoBRvEk8yDsWuJw,prod_U8lpILMM3fNqsg,Surf School,OnlySurf Surf School,txcd_10000000,Surf School Monthly,2026-03-13 11:54,"99,99",eur,month,1,licensed,,per_unit,,unspecified
+price_1TAUGZCOpqoBRvEkqWeuvCVF,prod_U8loSmYCbFKMiw,Coach Pro,OnlySurf Coach Pro,txcd_10000000,Coach Pro Monthly,2026-03-13 11:52,"39,99",eur,month,1,licensed,,per_unit,,unspecified
+price_1TAUFICOpqoBRvEkEXrre1sf,prod_U8lmMKrUwwM6N9,Coach Starter,OnlySurf Coach Starter,txcd_10000000,Coach Starter Monthly,2026-03-13 11:51,"19,99",eur,month,1,licensed,,per_unit,,unspecified

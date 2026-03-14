@@ -25,6 +25,12 @@ for dir in backend trigger.dev; do
     fi
 done
 
+echo "✅ Dependencies installed successfully!"
+echo ""
+echo "📊 Database: Using Neon serverless PostgreSQL"
+echo "   No local database container needed!"
+echo "   See NEON-BRANCHES.md for branch management"
+echo ""
 echo "Starting docker compose file..."
 docker-compose -f docker-compose.yaml up -d --build
 

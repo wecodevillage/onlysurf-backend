@@ -14,7 +14,6 @@ export class AuthService {
   constructor(private prisma: PrismaService) {}
 
   getMe(userId: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -52,7 +51,6 @@ export class AuthService {
     });
 
     if (existingProfile) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return this.prisma.profile.update({
         where: { userId },
         data,
@@ -60,7 +58,6 @@ export class AuthService {
     }
 
     // Create profile if it doesn't exist
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.profile.create({
       data: {
         userId,
@@ -84,7 +81,6 @@ export class AuthService {
       });
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return user;
   }
 
@@ -98,7 +94,6 @@ export class AuthService {
       throw new Error('Profile not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.socialNetwork.create({
       data: {
         profileId: profile.id,
@@ -118,7 +113,6 @@ export class AuthService {
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.socialNetwork.findMany({
       where: { profileId: profile.id },
       orderBy: { createdAt: 'asc' },
@@ -138,7 +132,6 @@ export class AuthService {
       throw new Error('Profile not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.socialNetwork.update({
       where: {
         id: socialNetworkId,
@@ -175,7 +168,6 @@ export class AuthService {
       throw new Error('Profile not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.service.create({
       data: {
         profileId: profile.id,
@@ -196,7 +188,6 @@ export class AuthService {
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.service.findMany({
       where: { profileId: profile.id, isActive: true },
       orderBy: { createdAt: 'asc' },
@@ -216,7 +207,6 @@ export class AuthService {
       throw new Error('Profile not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.service.update({
       where: {
         id: serviceId,
@@ -253,7 +243,6 @@ export class AuthService {
       throw new Error('Profile not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.profilePhoto.create({
       data: {
         profileId: profile.id,
@@ -273,7 +262,6 @@ export class AuthService {
       return [];
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.profilePhoto.findMany({
       where: { profileId: profile.id },
       orderBy: { order: 'asc' },
@@ -293,7 +281,6 @@ export class AuthService {
       throw new Error('Profile not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.profilePhoto.update({
       where: {
         id: photoId,

@@ -13,6 +13,10 @@ export const validationSchema: Joi.ObjectSchema = Joi.object({
   DATABASE_URL: Joi.string().required(),
   DIRECT_URL: Joi.string().optional(),
 
+  // Neon (optional - for branch management)
+  NEON_PROJECT_ID: Joi.string().optional(),
+  NEON_API_KEY: Joi.string().optional(),
+
   // Firebase
   FIREBASE_PROJECT_ID: Joi.string().required(),
   FIREBASE_PRIVATE_KEY: Joi.string().required(),
