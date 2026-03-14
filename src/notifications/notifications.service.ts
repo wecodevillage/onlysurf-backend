@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   BadRequestException,
   Injectable,
@@ -225,7 +226,6 @@ export class NotificationsService {
         customPayload.text = dto.text;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await this.resend.emails.send(customPayload as any);
       if (error) {
         throw new BadRequestException(error.message);
@@ -276,7 +276,6 @@ export class NotificationsService {
         text: rendered.text,
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error } = await this.resend.emails.send(payload as any);
       if (error) {
         throw new BadRequestException(error.message);

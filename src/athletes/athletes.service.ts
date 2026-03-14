@@ -6,7 +6,6 @@ export class AthletesService {
   constructor(private prisma: PrismaService) {}
 
   findAll(academyId?: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.user.findMany({
       where: {
         role: 'ATHLETE',
@@ -35,7 +34,6 @@ export class AthletesService {
   }
 
   findOne(id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.user.findUnique({
       where: { id },
       include: {

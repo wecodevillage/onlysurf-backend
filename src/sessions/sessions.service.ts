@@ -17,7 +17,6 @@ export class SessionsService {
       scheduledAt?: Date;
     },
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.session.create({
       data: {
         ...data,
@@ -42,7 +41,6 @@ export class SessionsService {
   }
 
   findAll(coachId?: string, academyId?: string, status?: SessionStatus) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.session.findMany({
       where: {
         ...(coachId && { coachId }),
@@ -136,7 +134,6 @@ export class SessionsService {
       throw new NotFoundException('Session not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return session;
   }
 
@@ -150,7 +147,6 @@ export class SessionsService {
       scheduledAt?: Date;
     },
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.session.update({
       where: { id },
       data,
@@ -158,14 +154,12 @@ export class SessionsService {
   }
 
   delete(id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.session.delete({
       where: { id },
     });
   }
 
   addAthlete(sessionId: string, athleteId: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.sessionRoster.create({
       data: {
         sessionId,
