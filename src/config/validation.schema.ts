@@ -48,6 +48,11 @@ export const validationSchema: Joi.ObjectSchema = Joi.object({
   RESEND_API_KEY: Joi.string().required(),
   RESEND_FROM_EMAIL: Joi.string().email().required(),
 
+  // Notifications (Web Push / VAPID)
+  NOTIFICATIONS_VAPID_PUBLIC_KEY: Joi.string().optional(),
+  NOTIFICATIONS_VAPID_PRIVATE_KEY: Joi.string().optional(),
+  NOTIFICATIONS_VAPID_SUBJECT: Joi.string().optional(),
+
   // Rate Limiting
   RATE_LIMIT_TTL: Joi.number().default(60),
   RATE_LIMIT_MAX: Joi.number().default(100),

@@ -118,6 +118,23 @@ export class AcademiesController {
     return { members };
   }
 
+  @Get(':id/stats')
+  @ApiOperation({
+    summary: 'Get academy statistics',
+    description:
+      'Retrieve academy summary statistics including sessions, members, waves, and media totals',
+  })
+  @ApiParam({ name: 'id', description: 'Academy ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Academy stats retrieved successfully',
+  })
+  @ApiResponse({ status: 404, description: 'Academy not found' })
+  async getStats(@Param('id') id: string) {
+    const stats = await this.academiesService.getStats(id);
+    return { stats };
+  }
+
   @Post(':id/invites')
   @Roles(UserRole.COACH, UserRole.ADMIN)
   @ApiOperation({

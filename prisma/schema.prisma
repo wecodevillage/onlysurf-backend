@@ -54,6 +54,7 @@ model User {
   scores            Score[]
   notes             Note[]
   subscription      Subscription?
+  notificationSubscriptions NotificationSubscription[]
   savedWaves        SavedWave[]
   payments          Payment[]
 
@@ -469,6 +470,22 @@ model Subscription {
   @@index([stripeSubscriptionId])
   @@index([status])
   @@map("subscriptions")
+}
+
+model NotificationSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notification_subscriptions")
 }
 
 // ================================

@@ -28,6 +28,7 @@ import { WavesModule } from './waves/waves.module';
 import { SavedWavesModule } from './saved-waves/saved-waves.module';
 import { BillingModule } from './billing/billing.module';
 import { MediaModule } from './media/media.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 // Guards
 import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
@@ -76,6 +77,7 @@ import { FirebaseAuthGuard } from './auth/firebase-auth.guard';
     SavedWavesModule,
     BillingModule,
     MediaModule,
+    NotificationsModule,
   ],
   providers: [
     // Global Firebase Auth Guard
