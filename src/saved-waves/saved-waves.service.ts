@@ -156,18 +156,21 @@ export class SavedWavesService {
     });
 
     // Check if any other saved waves reference this video asset
-    const otherReferences = await this.prisma.savedWave.count({
-      where: {
-        wave: {
-          videoAssetId: savedWave.wave.videoAssetId,
-        },
-      },
-    });
+    const videoAssetId = savedWave.wave.videoAssetId;
+    const otherReferences = videoAssetId
+      ? await this.prisma.savedWave.count({
+          where: {
+            wave: {
+              videoAssetId,
+            },
+          },
+        })
+      : 0;
 
     const isSessionArchived =
       savedWave.wave.session.status === 'ARCHIVED' ||
       savedWave.wave.session.archivedAt !== null;
-    const muxAssetId = savedWave.wave.videoAsset.muxAssetId;
+    const muxAssetId = savedWave.wave.videoAsset?.muxAssetId;
     const shouldDeleteAsset =
       otherReferences === 0 && muxAssetId && isSessionArchived;
 

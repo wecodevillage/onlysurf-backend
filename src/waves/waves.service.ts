@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { WaveMediaType } from '@prisma/client';
 
 @Injectable()
 export class WavesService {
@@ -8,7 +9,10 @@ export class WavesService {
   create(data: {
     sessionId: string;
     academyId?: string;
-    videoAssetId: string;
+    videoAssetId?: string;
+    photoAssetId?: string;
+    mediaType?: WaveMediaType;
+    originalFileUrl?: string;
     title?: string;
     description?: string;
     startTime?: number;
@@ -16,7 +20,6 @@ export class WavesService {
     durationSeconds?: number;
     thumbnailUrl?: string;
   }) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.create({
       data,
       include: {
@@ -27,6 +30,7 @@ export class WavesService {
           },
         },
         videoAsset: true,
+        photoAsset: true,
         tags: {
           include: {
             athlete: {
@@ -43,7 +47,6 @@ export class WavesService {
   }
 
   findAll(sessionId?: string, athleteId?: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.findMany({
       where: {
         ...(sessionId && { sessionId }),
@@ -63,6 +66,7 @@ export class WavesService {
           },
         },
         videoAsset: true,
+        photoAsset: true,
         tags: {
           include: {
             athlete: {
@@ -127,6 +131,7 @@ export class WavesService {
           },
         },
         videoAsset: true,
+        photoAsset: true,
         tags: {
           include: {
             athlete: {
@@ -167,7 +172,6 @@ export class WavesService {
       throw new NotFoundException('Wave not found');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return wave;
   }
 
@@ -177,9 +181,11 @@ export class WavesService {
       title?: string;
       description?: string;
       thumbnailUrl?: string;
+      photoAssetId?: string;
+      mediaType?: WaveMediaType;
+      originalFileUrl?: string;
     },
   ) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.update({
       where: { id },
       data,
@@ -187,14 +193,12 @@ export class WavesService {
   }
 
   delete(id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.wave.delete({
       where: { id },
     });
   }
 
   tagAthlete(waveId: string, athleteId: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.waveTag.create({
       data: {
         waveId,
@@ -213,7 +217,6 @@ export class WavesService {
   }
 
   addScore(waveId: string, coachId: string, score: number, category?: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.score.create({
       data: {
         waveId,
@@ -234,7 +237,6 @@ export class WavesService {
   }
 
   updateScore(id: string, score?: number, category?: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.score.update({
       where: { id },
       data: {
@@ -254,14 +256,12 @@ export class WavesService {
   }
 
   deleteScore(id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.score.delete({
       where: { id },
     });
   }
 
   addNote(waveId: string, coachId: string, content: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.note.create({
       data: {
         waveId,
@@ -281,7 +281,6 @@ export class WavesService {
   }
 
   updateNote(id: string, content: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.note.update({
       where: { id },
       data: {
@@ -300,7 +299,6 @@ export class WavesService {
   }
 
   deleteNote(id: string) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.prisma.note.delete({
       where: { id },
     });
@@ -309,7 +307,21 @@ export class WavesService {
   async getDownloadUrl(id: string): Promise<string> {
     const wave = await this.findOne(id);
 
-    if (!wave.videoAsset.muxPlaybackId) {
+    const originalFileUrl = wave.originalFileUrl;
+    if (typeof originalFileUrl === 'string' && originalFileUrl.length > 0) {
+      return originalFileUrl;
+    }
+
+    if (wave.mediaType === WaveMediaType.PHOTO) {
+      const photoPublicUrl = wave.photoAsset?.publicUrl;
+      if (typeof photoPublicUrl === 'string' && photoPublicUrl.length > 0) {
+        return photoPublicUrl;
+      }
+
+      throw new NotFoundException('Photo not ready for download');
+    }
+
+    if (!wave.videoAsset?.muxPlaybackId) {
       throw new NotFoundException('Video not ready for download');
     }
 

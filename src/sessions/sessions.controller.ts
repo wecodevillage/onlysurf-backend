@@ -31,6 +31,9 @@ class CreateSessionDto {
   photoUrl?: string;
   conditions?: string;
   notes?: string;
+  photoPrice?: number;
+  videoPrice?: number;
+  currency?: string;
   latitude?: number;
   longitude?: number;
   scheduledAt?: Date;
@@ -44,6 +47,9 @@ class UpdateSessionDto {
   photoUrl?: string;
   conditions?: string;
   notes?: string;
+  photoPrice?: number;
+  videoPrice?: number;
+  currency?: string;
   latitude?: number;
   longitude?: number;
   scheduledAt?: Date;

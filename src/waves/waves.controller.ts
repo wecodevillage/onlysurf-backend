@@ -20,11 +20,15 @@ import {
 import { WavesService } from './waves.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { CurrentUserPayload } from '../common/decorators/current-user.decorator';
+import { WaveMediaType } from '@prisma/client';
 
 class CreateWaveDto {
   sessionId: string;
   academyId?: string;
-  videoAssetId: string;
+  videoAssetId?: string;
+  photoAssetId?: string;
+  mediaType?: WaveMediaType;
+  originalFileUrl?: string;
   title?: string;
   description?: string;
   startTime?: number;
@@ -37,6 +41,9 @@ class UpdateWaveDto {
   title?: string;
   description?: string;
   thumbnailUrl?: string;
+  photoAssetId?: string;
+  mediaType?: WaveMediaType;
+  originalFileUrl?: string;
 }
 
 class TagAthleteDto {

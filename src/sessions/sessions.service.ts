@@ -14,6 +14,14 @@ export class SessionsService {
       description?: string;
       type: SessionType;
       location?: string;
+      photoUrl?: string;
+      conditions?: string;
+      notes?: string;
+      photoPrice?: number;
+      videoPrice?: number;
+      currency?: string;
+      latitude?: number;
+      longitude?: number;
       scheduledAt?: Date;
     },
   ) {
@@ -144,6 +152,14 @@ export class SessionsService {
       description?: string;
       status?: SessionStatus;
       location?: string;
+      photoUrl?: string;
+      conditions?: string;
+      notes?: string;
+      photoPrice?: number;
+      videoPrice?: number;
+      currency?: string;
+      latitude?: number;
+      longitude?: number;
       scheduledAt?: Date;
     },
   ) {

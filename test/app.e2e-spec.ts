@@ -1,25 +1,22 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import './setup-e2e';
+import { TestContext, createTestApp, destroyTestApp } from './helpers/test-app';
 
-describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+describe('App Health (e2e)', () => {
+  let ctx: TestContext;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  beforeAll(async () => {
+    ctx = await createTestApp();
   });
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
+  afterAll(async () => {
+    await destroyTestApp(ctx);
+  });
+
+  it('GET /v1/health → returns ok', async () => {
+    const res = await ctx.request.get('/v1/health').expect(200);
+
+    expect(res.body.status).toBe('ok');
+    expect(res.body.service).toBe('onlysurf-api');
+    expect(res.body.timestamp).toBeDefined();
   });
 });
